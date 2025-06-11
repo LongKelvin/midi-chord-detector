@@ -124,11 +124,8 @@ This project provides a Python-based system for real-time MIDI chord detection, 
 - Save changes and restart the GUI to apply.
 
 ## Performance Notes
-- **Latency**: ~17–18ms (15ms buffer + ~2–3ms processing), suitable for real-time use.
+- **Latency**: ~17–18ms (15ms buffer + ~2–3ms processing).
 - **CPU/Memory**: Lightweight (<10MB memory, <5% CPU on modern hardware).
-- **Tuning**:
-  - Reduce `chord_buffer_time` in `midi_chord_gui.py` (e.g., to 0.01) for lower latency, but this may affect chord grouping accuracy.
-  - Adjust `min_notes_for_chord` or `confidence_threshold` in `midi_chord_recognizer.py` for specific musical styles.
 
 ## Troubleshooting
 - **No MIDI Devices**:
@@ -146,16 +143,11 @@ This project provides a Python-based system for real-time MIDI chord detection, 
     logging.basicConfig(level=logging.DEBUG)
     ```
 
-## Extending the Project
-- **Add Chord Progression Display**: Modify `midi_chord_gui.py` to show the chord progression from `recognizer.get_current_status()['progression']`.
-- **Interactive Simulator**: Extend `midi_simulator.py` to accept user input for real-time chord simulation.
-- **MIDI File Input**: Add support in `midi_simulator.py` to read MIDI files for complex sequences.
-
 ## License
-This project is provided for educational purposes under the MIT License. See `LICENSE` file (if included) for details.
+This project is provided for educational purposes under the MIT License. See `LICENSE` file  for details.
 
 ## Contact
 - For issues or feature requests, contact the maintainers or open a GitHub issue.
 
 ---
-*Generated on June 15, 2025*
+*Created on June 15, 2025*
