@@ -37,7 +37,7 @@
   },
   "sus2": {
     "name": "Suspended 2nd",
-    "intervals": [ Daemonicus2, 7]
+    "intervals": [ 0,2, 7]
   },
   "sus4": {
     "name": "Suspended 4th",
@@ -103,18 +103,7 @@
     "name": "Add #11",
     "intervals": [0, 4, 7, 18]
   },
-  "maj9": {
-    "name": "Major 9th",
-    "intervals": [0, 4, 7, 11, 14]
-  },
-  "min9": {
-    "name": "Minor 9th",
-    "intervals": [0, 3, 7, 10, 14]
-  },
-  "9": {
-    "name": "Dominant 9th",
-    "intervals": [0, 4, 7, 10, 14]
-  },
+
   "6/9": {
     "name": "Six Nine",
     "intervals": [0, 4, 7, 9, 14]
@@ -135,14 +124,7 @@
     "name": "Major 7th flat 9",
     "intervals": [0, 4, 7, 11, 13]
   },
-  "min11": {
-    "name": "Minor 11th",
-    "intervals": [0, 3, 7, 10, 14, 17]
-  },
-  "11": {
-    "name": "Dominant 11th",
-    "intervals": [0, 4, 7, 10, 14, 17]
-  },
+
   "9sus4": {
     "name": "Dominant 9th Suspended 4th",
     "intervals": [0, 5, 7, 10, 14]
@@ -198,5 +180,29 @@
   "7#5b9": {
     "name": "Dominant 7th #5 b9",
     "intervals": [0, 4, 8, 10, 13]
+  },
+  "maj9": {
+    "name": "Major 9th", 
+    "intervals": [0, 4, 7, 11, 14]
+  },
+  "min9": {
+    "name": "Minor 9th", 
+    "intervals": [0, 3, 7, 10, 14]
+  },
+  "9": {
+    "name": "Dominant 9th", 
+    "intervals": [0, 4, 7, 10, 14]
+  },
+  "maj11": {
+    "name": "Major 11th", 
+    "intervals": [0, 4, 7, 11, 14, 17]
+  },
+  "min11": {
+    "name": "Minor 11th", 
+    "intervals": [0, 3, 7, 10, 14, 17]
+  },
+  "11": {
+    "name": "Dominant 11th", 
+    "intervals": [0, 4, 7, 10, 14, 17]
   }
 }
