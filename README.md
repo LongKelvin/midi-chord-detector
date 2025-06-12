@@ -161,12 +161,6 @@ venv\Scripts\activate
     - Ensure `data/chord_definitions.json` is present in the correct location and contains valid JSON.
     - Look for error messages in the console output.
 
-## Future Enhancements (Potential)
-- Staff notation display.
-- MIDI recording and playback.
-- More advanced UI styling and themes.
-- User-configurable settings panel (e.g., for buffer times, score thresholds).
-- Scale detection and display.
 
 ## License
 This project is typically provided under a permissive open-source license like MIT (check for a `LICENSE` file in the repository). For this example, assume it's for educational and personal use.
