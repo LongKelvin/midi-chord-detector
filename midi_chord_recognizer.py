@@ -1,4 +1,3 @@
---- START OF FILE midi_chord_recognize_final.py ---
 import mido
 import zmq
 import json
@@ -6,7 +5,7 @@ import time
 import threading
 import logging
 import argparse
-from typing import Set, Dict, Optional, FrozenSet, Tuple, List, Any
+from typing import Callable, Set, Dict, Optional, FrozenSet, Tuple, List, Any
 from collections import OrderedDict
 from pathlib import Path
 
@@ -241,7 +240,10 @@ class MIDIChordRecognizer:
         zmq_pub_port: int = DEFAULT_ZMQ_PUB_PORT,
         min_notes_for_chord: int = DEFAULT_MIN_NOTES_FOR_CHORD,
         chord_buffer_time_on: float = DEFAULT_CHORD_BUFFER_TIME_ON,
-        chord_config_path: str = DEFAULT_CHORD_CONFIG_PATH
+        chord_config_path: str = DEFAULT_CHORD_CONFIG_PATH,
+        use_zmq: bool = True,
+        update_callback: Optional[Callable[[Dict[str, Any]], None]] = None # << NEW PARAMETER
+        
     ):
         self.midi_port_name = midi_port_name
         self.zmq_pub_port = zmq_pub_port
@@ -257,6 +259,8 @@ class MIDIChordRecognizer:
         self.zmq_socket: Optional[zmq.Socket] = None
         self.lock = threading.Lock()
         self.midi_thread: Optional[threading.Thread] = None
+        self.use_zmq = use_zmq # new parameter
+        self.update_callback = update_callback # new parameter
         ChordTheory.load_chord_definitions(self.chord_config_path)
 
     def _setup_midi(self) -> bool:
@@ -290,6 +294,12 @@ class MIDIChordRecognizer:
 
     def _setup_zmq(self) -> bool:
         try:
+            if not self.use_zmq:
+                self.zmq_context = None # Ensure these are None if ZMQ is off
+                self.zmq_socket = None
+                logger.info("ZMQ publishing is disabled for this recognizer instance.")
+                return True # Return True to indicate setup (of "nothing") was successful
+
             self.zmq_context = zmq.Context()
             self.zmq_socket = self.zmq_context.socket(zmq.PUB)
             self.zmq_socket.bind(f"tcp://*:{self.zmq_pub_port}")
@@ -382,7 +392,17 @@ class MIDIChordRecognizer:
             )
         else:
             logger.info(f"N.C. Active notes: {publish_data['played_notes_midi']}")
-        self._publish(publish_data)
+        
+        # Call the callback if it exist
+        if self.update_callback:
+            try:
+                self.update_callback(publish_data)
+            except Exception as e:
+                logger.error(f"Error in update_callback: {e}", exc_info=True)
+
+        if self.use_zmq: # Only publish to ZMQ if enabled
+            self._publish(publish_data) # _publish now only handles ZMQ
+
         if self.chord_buffer_time > 0:
             time.sleep(self.chord_buffer_time)
 
@@ -485,5 +505,4 @@ if __name__ == "__main__":
         finally: recognizer.stop()
     else:
         logger.error("Failed to start MIDI Chord Recognizer.")
-
---- END OF FILE midi_chord_recognize_final.py ---
+        exit(1)
