@@ -1,153 +1,177 @@
-# Real-Time MIDI Chord Detection Project
 
-This project provides a Python-based system for real-time MIDI chord detection, featuring a core library for processing MIDI input, a PyQt5 GUI for displaying detected chords, and a simulator for testing without a physical MIDI device. It is designed for Windows but should work cross-platform with minor adjustments.
+# Real-Time MIDI Chord Suite
+
+This project provides a Python-based system for real-time MIDI chord detection and visualization. It features a core engine for processing MIDI input, a PyQt6 GUI for displaying detected chords and live piano keyboard activity.
 
 ## Features
-- **Core Library**: Processes MIDI input to detect chords, supporting dyads, triads, seventh chords, and extended chords, with customizable definitions.
-- **GUI Application**: Displays chord names in real-time, with a dropdown to select MIDI input devices and a start/stop button.
-- **Virtual MIDI Simulator**: Creates a virtual MIDI port and sends simulated chord sequences for testing without hardware.
-- **Chord Definitions**: JSON-based configuration for flexible chord types.
+- **Core Engine**: `ChordRecognitionEngine` processes MIDI input to detect a wide range of chords (dyads, triads, sevenths, extensions, alterations) with high accuracy.
+- **Music Theory Module**: `MusicTheory` class encapsulates chord definitions and interval logic, configurable via JSON.
+- **PyQt6 GUI Application**:
+    - Real-time display of detailed chord information (name, root, bass, type, inversion, score).
+    - Interactive 88-key `PianoKeyboard` visualizing live MIDI input.
+    - Dropdown to select MIDI input devices.
+    - Start/Stop functionality for chord detection (achieved by selecting/deselecting a port).
+- **Configurable Chord Definitions**: `chord_definitions.json` allows for easy customization and expansion of recognizable chords.
 
 ## Prerequisites
 - **Python**: Version 3.8 or higher.
-- **Operating System**: Windows (tested on Windows 10/11).
+- **Operating System**: Tested on Windows 10/11, but designed to be cross-platform.
 - **Dependencies**:
   - `mido`: For MIDI input/output handling.
-  - `python-rtmidi`: Backend for `mido`.
-  - `PyQt5`: For the GUI interface.
-  - Install via:
+  - `python-rtmidi`: Recommended backend for `mido` on Windows/Linux.
+  - `PyQt6`: For the GUI interface.
+  - Install core dependencies via:
     ```bash
-    pip install mido python-rtmidi PyQt5
+    pip install mido python-rtmidi PyQt6
     ```
 
 ## Project Structure
-- `midi_chord_recognizer.py`: Core library for MIDI chord detection.
-- `midi_chord_gui.py`: PyQt5 GUI application for real-time chord display.
-- `chord_definitions.json`: JSON file defining chord types and intervals.
-- `midi_simulator.py`: Script to simulate a virtual MIDI device for testing.
+
+The project is organized into modular packages for better maintainability and separation of concerns:
+
+```bash
+midi-chord-suite/
+├── chord_app.py                # Main application entry point (Initializes PyQt GUI)
+│
+├── core/                       # Core non-GUI logic
+│   ├── __init__.py             # Makes 'core' a Python package
+│   ├── chord_recognition_engine.py  # Contains ChordRecognitionEngine class
+│   └── music_theory.py              # Contains MusicTheory class (definitions, interval logic)
+│
+├── ui/                         # User Interface components (PyQt6)
+│   ├── __init__.py             # Makes 'ui' a Python package
+│   ├── main_window.py          # Contains MainWindow class (main application window)
+│   ├── piano_keyboard.py       # Contains PianoKeyboard and PianoKey custom widget classes
+│   ├── workers/                # Contains EngineWorkerThread (QThread for MIDI processing)
+│   │                             # and EngineSignals (custom Qt signals)
+│   └── resources/              # Optional: For UI assets like QSS stylesheets, icons
+│       └── style.qss           # Example stylesheet
+│
+├── data/                       # Default data files
+│   └── chord_definitions.json  # JSON file for chord definitions, loaded by MusicTheory
+│                
+├── .gitignore                  # Specifies intentionally untracked files for Git
+├── README.md                   # This file: Project overview and instructions
+  ```
 
 ## Setup Instructions
 
 ### 1. Clone or Download the Project
-- Download the project files or clone the repository to a local directory.
-- Ensure all four files (`midi_chord_recognizer.py`, `midi_chord_gui.py`, `chord_definitions.json`, `midi_simulator.py`) are in the same directory.
+- Obtain the project files, ensuring the directory structure outlined above is maintained.
 
-### 2. Install Dependencies
-- Open a terminal in the project directory.
-- Install required Python packages:
+### 2. Create and Activate a Virtual Environment (Recommended)
+```bash
+# Navigate to the project root directory (midi-chord-suite)
+python -m venv venv
+
+# On Windows:
+venv\Scripts\activate
+
+# On macOS/Linux:
+# source venv/bin/activate
+```
+
+### 3. Install Dependencies
+- With your virtual environment activated, install the required Python packages from `requirements.txt`:
   ```bash
-  pip install mido python-rtmidi PyQt5
+  pip install -r requirements.txt
   ```
+  (If `requirements.txt` is not yet created, install manually: `pip install mido python-rtmidi PyQt6`)
 
-### 3. Verify MIDI Backend
-- Ensure `mido` uses the `rtmidi` backend:
+### 4. Verify MIDI Backend (Optional)
+- `mido` typically uses `rtmidi` as its backend. You can check by running:
   ```bash
   python -c "import mido; print(mido.backend)"
   ```
-- Expected output: `<module 'mido.backends.rtmidi' ...>`.
-- If not, set the environment variable:
-  ```bash
-  set MIDO_BACKEND=rtmidi
-  ```
+- If a different backend is shown and you encounter issues, you might need to set the `MIDO_BACKEND` environment variable (e.g., `set MIDO_BACKEND=rtmidi` on Windows CMD before running the app).
 
-### 4. Prepare Chord Definitions
-- The `chord_definitions.json` file is pre-configured with a comprehensive set of chords (dyads, triads, seventh chords, etc.).
-- Customize it by editing the JSON to add or modify chord types (see "Customizing Chord Definitions" below).
-- Ensure the file is in the project directory.
+### 5. Chord Definitions
+- The `data/chord_definitions.json` file should be present and contains a comprehensive set of chord definitions.
+- This file is loaded by the `MusicTheory` module at startup.
 
 ## Running the Application
 
-### Option 1: Using a Physical MIDI Device
-1. **Connect a MIDI Device**:
-   - Plug in a MIDI keyboard or controller.
-   - Check available MIDI ports:
-     ```bash
-     python -c "import mido; print(mido.get_input_names())"
-     ```
-2. **Run the GUI**:
-   ```bash
-   python midi_chord_gui.py
-   ```
-   - In the GUI:
-     - Select your MIDI device from the dropdown (e.g., "MIDI Keyboard").
-     - Click "Start Detection".
-     - Play chords on the keyboard; the chord name (e.g., "Cmaj", "G7") appears in real-time.
-     - Click "Stop Detection" to pause or close the window to exit.
+1.  **Navigate to the Project Root**: Open your terminal or command prompt and change the directory to where `chord_app.py` is located (the root of `midi-chord-suite`).
+2.  **Ensure Virtual Environment is Active** (if you created one).
+3.  **Launch the Application**:
+    ```bash
+    python chord_app.py
+    ```
+    You can also pass command-line arguments (e.g., for log level, default MIDI port if implemented):
+    ```bash
+    python chord_app.py --log-level DEBUG --midi-port "Your MIDI Device Name"
+    ```
+    Use `python chord_app.py --list-midi-ports` to see available MIDI inputs.
 
-### Option 2: Using the Virtual MIDI Simulator
-1. **Run the Simulator**:
-   ```bash
-   python midi_simulator.py
-   ```
-   - The script creates a virtual MIDI port named "Virtual MIDI" and sends a sequence of chords (Cmaj, G7, Amin, pause).
-   - It waits 2 seconds before starting to allow time to launch the GUI.
-2. **Run the GUI** (in a separate terminal, within 2 seconds):
-   ```bash
-   python midi_chord_gui.py
-   ```
-   - In the GUI:
-     - Select "Virtual MIDI" from the dropdown (refreshed every 5 seconds).
-     - Click "Start Detection".
-     - The chord label updates to show "Cmaj", "G7", "Amin", and "N.C.", each lasting ~1 second with a blue flash.
-     - Close the window to stop.
-3. **Stop the Simulator**:
-   - Press `Ctrl+C` in the simulator terminal or wait for the sequence to complete.
+4.  **Using the GUI**:
+    -   Upon launch, the main window will appear.
+    -   Use the "Select MIDI Input Device" dropdown to choose your connected MIDI keyboard or controller.
+    -   Once a device is selected, the application automatically starts listening.
+    -   Play notes or chords on your MIDI device.
+    -   The "Chord Display" area will update in real-time with detailed information about the recognized chord.
+    -   The virtual "Piano Keyboard" at the bottom of the window will visually highlight the keys being played.
+    -   To stop detection for a specific port, select the placeholder "Select MIDI Input Device" from the dropdown.
+    -   Close the application window to exit completely. The status bar provides operational feedback.
 
-## Example Output
-- **GUI**:
-  - Chord label shows: "Cmaj" → "G7" → "Amin" → "N.C." (with blue flash on updates).
-  - Status bar shows "Running" or "Stopped".
-- **Simulator Log**:
-  ```
-  2025-06-11 19:31:01,123 - __main__ - INFO - Created virtual MIDI output port: Virtual MIDI
-  2025-06-11 19:31:03,126 - __main__ - INFO - Playing chord: [60, 64, 67]
-  2025-06-11 19:31:04,226 - __main__ - INFO - Playing chord: [55, 59, 62, 65]
-  ...
-  ```
-- **GUI Log** (if debug enabled in `midi_chord_recognizer.py`):
-  ```
-  2025-06-11 19:31:03,200 - __main__ - INFO - Chord detection started
-  2025-06-11 19:31:03,210 - __main__ - DEBUG - Chord updated: Cmaj
-  ...
-  ```
+## GUI Features
+- **MIDI Device Selection**: Dynamically populated dropdown lists all available MIDI input ports.
+- **Real-Time Chord Display**:
+    - Prominent display of the full recognized chord name (e.g., "Cmaj9/E").
+    - Detailed breakdown: Root note, Bass note, Chord Type, Inversion (e.g., "1st Inversion", "Root Position"), and Recognition Score.
+    - Voicing characteristics: Density (e.g., "Close Voicing") and octave span of played notes.
+    - Lists of played MIDI notes (with numbers and names) and unique pitch classes.
+    - Intervals of played notes relative to the recognized root and also relative to the actual bass note.
+- **Live Piano Keyboard**: An 88-key visual piano representation that highlights keys in real-time as they are pressed on the MIDI input device.
+- **Status Bar**: Displays messages about the application's current state, selected MIDI port, and any errors.
+- **Styling**: Basic dark theme implemented with potential for further customization via QSS (`ui/resources/style.qss`).
 
 ## Customizing Chord Definitions
-- Edit `chord_definitions.json` to add or modify chords.
-- Example entry:
+- Modify the `data/chord_definitions.json` file to add, remove, or alter chord types.
+- The JSON structure for each chord is:
   ```json
-  "maj9": {
-    "name": "Major 9th",
-    "intervals": [0, 4, 7, 11, 14]
+  "chord_symbol": {
+    "name": "Descriptive Chord Name",
+    "intervals": [/* list of semitone intervals from the root, e.g., 0, 4, 7 for major */]
   }
   ```
-- Each chord has a `name` (display name) and `intervals` (semitones from the root).
-- Save changes and restart the GUI to apply.
+- Example:
+  ```json
+  "min7b5": {
+    "name": "Half-Diminished 7th",
+    "intervals": [0, 3, 6, 10]
+  }
+  ```
+- The application loads these definitions when it starts. Restart the application to apply any changes made to this file.
 
-## Performance Notes
-- **Latency**: ~17–18ms (15ms buffer + ~2–3ms processing).
-- **CPU/Memory**: Lightweight (<10MB memory, <5% CPU on modern hardware).
+## Performance Considerations
+- **Latency**: The system aims for low latency. The `chord_buffer_time_on` (default ~15ms) in the `ChordRecognitionEngine` provides a brief window for notes of a chord to arrive together before analysis. Piano key visualization is intended to be as immediate as possible.
+- **Resource Usage**: Designed to be relatively lightweight. CPU and memory usage will vary with system specifications and the complexity of MIDI input.
 
 ## Troubleshooting
-- **No MIDI Devices**:
-  - Ensure `python-rtmidi` is installed and `rtmidi` is the backend.
-  - For the simulator, run it first to create the "Virtual MIDI" port.
-- **No Chord Updates**:
-  - Verify the GUI is "Running" and the correct MIDI port is selected.
-  - Check simulator logs to ensure messages are sent.
-- **Port Not Found**:
-  - Run `python -c "import mido; print(mido.get_input_names())"` while the simulator is active.
-  - Try a different port name in `midi_simulator.py` (e.g., "My Virtual MIDI").
-- **Errors**:
-  - Enable debug logging by modifying `midi_chord_recognizer.py`:
-    ```python
-    logging.basicConfig(level=logging.DEBUG)
-    ```
+- **No MIDI Devices in Dropdown**:
+    - Ensure your MIDI device is connected *before* starting the application, or wait for the periodic port scan (every 5 seconds) to update the list.
+    - Verify `python-rtmidi` is installed and functioning as a `mido` backend.
+    - Check your operating system's sound/MIDI settings to confirm the device is recognized.
+- **Application Not Responding or No Updates**:
+    - Ensure the correct MIDI port is selected.
+    - Check the status bar for any error messages.
+    - Run the application from a terminal to see console output, especially if you set a more verbose log level (e.g., `python chord_app.py --log-level DEBUG`).
+- **Errors During Startup or Operation**:
+    - Confirm all dependencies listed in `requirements.txt` are installed in your active Python environment.
+    - Ensure `data/chord_definitions.json` is present in the correct location and contains valid JSON.
+    - Look for error messages in the console output.
+
+## Future Enhancements (Potential)
+- Staff notation display.
+- MIDI recording and playback.
+- More advanced UI styling and themes.
+- User-configurable settings panel (e.g., for buffer times, score thresholds).
+- Scale detection and display.
 
 ## License
-This project is provided for educational purposes under the MIT License. See `LICENSE` file  for details.
+This project is typically provided under a permissive open-source license like MIT (check for a `LICENSE` file in the repository). For this example, assume it's for educational and personal use.
 
-## Contact
-- For issues or feature requests, contact the maintainers or open a GitHub issue.
+## Contact / Contributions
+For feedback, bug reports, or if you wish to contribute, please refer to the project's source repository (if applicable) for issue tracking and contribution guidelines.
 
----
-*Created on June 15, 2025*
+## Author: Long Kelvin ##
