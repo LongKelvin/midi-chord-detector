@@ -33,7 +33,7 @@ class ChordAppMainWindow(QMainWindow):
         self.recognizer_thread: Optional[MIDIWorkerThread] = None
         self.piano_keyboard_widget: Optional[PianoKeyboardWidget] = None
 
-        # --- Styling (Simple Example) ---
+        # --- Styling ---
         self.setStyleSheet("""
             QMainWindow {
                 background-color: #2E2E2E; /* Dark gray background */
