@@ -1,166 +1,217 @@
 {
-  "maj": {
-    "name": "Major Triad",
-    "intervals": [0, 4, 7]
-  },
-  "add4": {
-    "name": "Major Add 4",
-    "intervals": [0, 4, 5, 7]
-  },
-  "6": {
-    "name": "Major Sixth",
-    "intervals": [0, 4, 7, 9]
-  },
-  "6/9": {
-    "name": "Major Six Nine",
-    "intervals": [0, 2, 4, 7, 9]
-  },
-  "maj7": {
-    "name": "Major 7th",
-    "intervals": [0, 4, 7, 11]
-  },
-  "maj9": {
-    "name": "Major 9th",
-    "intervals": [0, 2, 4, 7, 11]
-  },
-  "maj11_formula": {
-    "name": "Major 11th (Formula)",
-    "intervals": [0, 2, 4, 5, 7, 11]
-  },
-  "maj13_formula": {
-    "name": "Major 13th (Formula)",
-    "intervals": [0, 2, 4, 5, 7, 9, 11]
-  },
-  "maj7#11": {
-    "name": "Major 7th Sharp 11th",
-    "intervals": [0, 4, 6, 7, 11]
-  },
-  "majb5": {
-    "name": "Major Flat 5",
-    "intervals": [0, 4, 6]
-  },
-  "min": {
-    "name": "Minor Triad",
-    "intervals": [0, 3, 7]
-  },
-  "madd4": {
-    "name": "Minor Add 4",
-    "intervals": [0, 3, 5, 7]
-  },
-  "min6": {
-    "name": "Minor Sixth",
-    "intervals": [0, 3, 7, 9]
-  },
-  "min7": {
-    "name": "Minor 7th",
-    "intervals": [0, 3, 7, 10]
-  },
-  "madd9": {
-    "name": "Minor Add 9",
-    "intervals": [0, 2, 3, 7]
-  },
-  "m6/9": {
-    "name": "Minor Six Nine",
-    "intervals": [0, 2, 3, 7, 9]
-  },
-  "min9": {
-    "name": "Minor 9th",
-    "intervals": [0, 2, 3, 7, 10]
-  },
-  "min11_formula": {
-    "name": "Minor 11th (Formula)",
-    "intervals": [0, 2, 3, 5, 7, 10]
-  },
-  "min13_formula": {
-    "name": "Minor 13th (Formula)",
-    "intervals": [0, 2, 3, 5, 7, 9, 10]
-  },
-  "minMaj7": {
-    "name": "Minor Major 7th",
-    "intervals": [0, 3, 7, 11]
-  },
-  "minMaj9": {
-    "name": "Minor Major 9th",
-    "intervals": [0, 2, 3, 7, 11]
-  },
-  "minMaj11_formula": {
-    "name": "Minor Major 11th (Formula)",
-    "intervals": [0, 2, 3, 5, 7, 11]
-  },
-  "minMaj13_formula": {
-    "name": "Minor Major 13th (Formula)",
-    "intervals": [0, 2, 3, 5, 7, 9, 11]
-  },
-  "min7b5": {
-    "name": "Half-Diminished 7th",
-    "intervals": [0, 3, 6, 10]
-  },
-  "7": {
-    "name": "Dominant 7th",
-    "intervals": [0, 4, 7, 10]
-  },
-  "9": {
-    "name": "Dominant 9th",
-    "intervals": [0, 2, 4, 7, 10]
-  },
-  "11": {
-    "name": "Dominant 11th (no 3rd)",
-    "intervals": [0, 2, 5, 7, 10]
-  },
-  "dom11_formula": {
-    "name": "Dominant 11th (Formula, with 3rd)",
-    "intervals": [0, 2, 4, 5, 7, 10]
-  },
-  "13": {
-    "name": "Dominant 13th (no 11th)",
-    "intervals": [0, 2, 4, 7, 9, 10]
-  },
-  "dom13_formula": {
-    "name": "Dominant 13th (Formula, with P11)",
-    "intervals": [0, 2, 4, 5, 7, 9, 10]
-  },
-  "7#5": {
-    "name": "Dominant 7th Sharp 5",
-    "intervals": [0, 4, 8, 10]
-  },
-  "sus4": {
-    "name": "Suspended 4th",
-    "intervals": [0, 5, 7]
-  },
-  "sus2": {
-    "name": "Suspended 2nd",
-    "intervals": [0, 2, 7]
-  },
-  "7sus4": {
-    "name": "Dominant 7th Suspended 4th",
-    "intervals": [0, 5, 7, 10]
-  },
-  "dim": {
-    "name": "Diminished Triad",
-    "intervals": [0, 3, 6]
-  },
-  "aug": {
-    "name": "Augmented Triad",
-    "intervals": [0, 4, 8]
-  },
-  "dim7": {
-    "name": "Diminished 7th",
-    "intervals": [0, 3, 6, 9]
-  },
-  "7b5": {
-    "name": "Dominant 7th Flat 5",
-    "intervals": [0, 4, 6, 10]
-  },
-  "7b9": {
-    "name": "Dominant 7th Flat 9",
-    "intervals": [0, 1, 4, 7, 10]
-  },
-  "7#9": {
-    "name": "Dominant 7th Sharp 9",
-    "intervals": [0, 3, 4, 7, 10]
-  },
-  "5": {
-    "name": "Power Chord",
-    "intervals": [0, 7]
-  }
+    "maj": {
+        "name": "Major Triad",
+        "core_intervals": [0, 4, 7],
+        "optional_intervals": []
+    },
+    "add4": {
+        "name": "Major Add 4",
+        "core_intervals": [0, 4, 7],
+        "optional_intervals": [5]
+    },
+    "6": {
+        "name": "Major Sixth",
+        "core_intervals": [0, 4, 7],
+        "optional_intervals": [9]
+    },
+    "6/9": {
+        "name": "Major Six Nine",
+        "core_intervals": [0, 4, 7],
+        "optional_intervals": [2, 9]
+    },
+    "maj7": {
+        "name": "Major 7th",
+        "core_intervals": [0, 4, 7, 11],
+        "optional_intervals": []
+    },
+    "maj9": {
+        "name": "Major 9th",
+        "core_intervals": [0, 4, 7, 11],
+        "optional_intervals": [2]
+    },
+    "maj11": {
+        "name": "Major 11th",
+        "core_intervals": [0, 4, 7, 11],
+        "optional_intervals": [2, 5]
+    },
+    "maj13": {
+        "name": "Major 13th",
+        "core_intervals": [0, 4, 7, 11],
+        "optional_intervals": [2, 5, 9]
+    },
+    "maj7#11": {
+        "name": "Major 7th Sharp 11th",
+        "core_intervals": [0, 4, 7, 11],
+        "optional_intervals": [6]
+    },
+    "majb5": {
+        "name": "Major Flat 5",
+        "core_intervals": [0, 4, 6],
+        "optional_intervals": []
+    },
+    "min": {
+        "name": "Minor Triad",
+        "core_intervals": [0, 3, 7],
+        "optional_intervals": []
+    },
+    "madd4": {
+        "name": "Minor Add 4",
+        "core_intervals": [0, 3, 7],
+        "optional_intervals": [5]
+    },
+    "min6": {
+        "name": "Minor Sixth",
+        "core_intervals": [0, 3, 7],
+        "optional_intervals": [9]
+    },
+    "min7": {
+        "name": "Minor 7th",
+        "core_intervals": [0, 3, 7, 10],
+        "optional_intervals": []
+    },
+    "madd9": {
+        "name": "Minor Add 9",
+        "core_intervals": [0, 3, 7],
+        "optional_intervals": [2]
+    },
+    "m6/9": {
+        "name": "Minor Six Nine",
+        "core_intervals": [0, 3, 7],
+        "optional_intervals": [2, 9]
+    },
+    "min9": {
+        "name": "Minor 9th",
+        "core_intervals": [0, 3, 7, 10],
+        "optional_intervals": [2]
+    },
+    "min11": {
+        "name": "Minor 11th",
+        "core_intervals": [0, 3, 7, 10],
+        "optional_intervals": [2, 5]
+    },
+    "min13": {
+        "name": "Minor 13th",
+        "core_intervals": [0, 3, 7, 10],
+        "optional_intervals": [2, 5, 9]
+    },
+    "minMaj7": {
+        "name": "Minor Major 7th",
+        "core_intervals": [0, 3, 7, 11],
+        "optional_intervals": []
+    },
+    "minMaj9": {
+        "name": "Minor Major 9th",
+        "core_intervals": [0, 3, 7, 11],
+        "optional_intervals": [2]
+    },
+    "min7b5": {
+        "name": "Half-Diminished 7th",
+        "core_intervals": [0, 3, 6, 10],
+        "optional_intervals": []
+    },
+    "7": {
+        "name": "Dominant 7th",
+        "core_intervals": [0, 4, 10],
+        "optional_intervals": [7]
+    },
+    "9": {
+        "name": "Dominant 9th",
+        "core_intervals": [0, 4, 10],
+        "optional_intervals": [2, 7]
+    },
+    "11": {
+        "name": "Dominant 11th",
+        "core_intervals": [0, 4, 10],
+        "optional_intervals": [2, 5, 7]
+    },
+    "13": {
+        "name": "Dominant 13th",
+        "core_intervals": [0, 4, 10],
+        "optional_intervals": [2, 7, 9]
+    },
+    "7#5": {
+        "name": "Dominant 7th Sharp 5",
+        "core_intervals": [0, 4, 10],
+        "optional_intervals": [8]
+    },
+    "7b9": {
+        "name": "Dominant 7th Flat 9",
+        "core_intervals": [0, 4, 10],
+        "optional_intervals": [1, 7]
+    },
+    "7#9": {
+        "name": "Dominant 7th Sharp 9",
+        "core_intervals": [0, 4, 10],
+        "optional_intervals": [3, 7]
+    },
+    "7b13": {
+        "name": "Dominant 7th Flat 13",
+        "core_intervals": [0, 4, 10],
+        "optional_intervals": [7, 8]
+    },
+    "7#5b9": {
+        "name": "Dominant 7th Sharp 5 Flat 9",
+        "core_intervals": [0, 4, 10],
+        "optional_intervals": [1, 8]
+    },
+    "9#5": {
+        "name": "Dominant 9th Sharp 5",
+        "core_intervals": [0, 4, 10],
+        "optional_intervals": [2, 8]
+    },
+    "13b9": {
+        "name": "Dominant 13th Flat 9",
+        "core_intervals": [0, 4, 10],
+        "optional_intervals": [1, 7, 9]
+    },
+    "7#5#9": {
+        "name": "Dominant 7th Sharp 5 Sharp 9",
+        "core_intervals": [0, 4, 10],
+        "optional_intervals": [3, 8]
+    },
+    "7b9b13": {
+        "name": "Dominant 7th Flat 9 Flat 13",
+        "core_intervals": [0, 4, 10],
+        "optional_intervals": [1, 8]
+    },
+    "sus4": {
+        "name": "Suspended 4th",
+        "core_intervals": [0, 5, 7],
+        "optional_intervals": []
+    },
+    "sus2": {
+        "name": "Suspended 2nd",
+        "core_intervals": [0, 2, 7],
+        "optional_intervals": []
+    },
+    "7sus4": {
+        "name": "Dominant 7th Suspended 4th",
+        "core_intervals": [0, 5, 10],
+        "optional_intervals": [7]
+    },
+    "dim": {
+        "name": "Diminished Triad",
+        "core_intervals": [0, 3, 6],
+        "optional_intervals": []
+    },
+    "aug": {
+        "name": "Augmented Triad",
+        "core_intervals": [0, 4, 8],
+        "optional_intervals": []
+    },
+    "dim7": {
+        "name": "Diminished 7th",
+        "core_intervals": [0, 3, 6, 9],
+        "optional_intervals": []
+    },
+    "7b5": {
+        "name": "Dominant 7th Flat 5",
+        "core_intervals": [0, 4, 6, 10],
+        "optional_intervals": []
+    },
+    "5": {
+        "name": "Power Chord",
+        "core_intervals": [0, 7],
+        "optional_intervals": []
+    }
 }
