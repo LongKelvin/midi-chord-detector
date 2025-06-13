@@ -1,0 +1,38 @@
+name: Build MIDI Chord App
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-windows:
+
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+
+    - name: Build executable with PyInstaller
+      run: |
+        pyinstaller pyinstaller\midi_chord_app.spec --clean --noconfirm
+
+    - name: Upload .exe artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: midi-chord-app-exe
+        path: dist/
