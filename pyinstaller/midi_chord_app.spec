@@ -28,7 +28,7 @@ a = Analysis(
     win_private_assemblies=False,
     cipher=block_cipher,
     noarchive=False,
-    hiddenimports=['mido.backends.rtmidi']
+    hiddenimports=['mido.backends.rtmidi','zmq']
 )
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
