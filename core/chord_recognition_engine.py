@@ -49,6 +49,7 @@ class MIDIChordRecognizer:
         self.midi_thread: Optional[threading.Thread] = None
         self.use_zmq = use_zmq
         self.update_callback = update_callback
+        self.chord_theory = ChordTheory()
         ChordTheory.load_chord_definitions(self.chord_config_path)
 
     def _setup_midi(self) -> bool:
@@ -182,7 +183,7 @@ class MIDIChordRecognizer:
         logger.info("MIDI handler thread stopped.")
 
     def _update_chord_and_publish(self):
-        chord_info = ChordTheory.recognize_chord(self.active_notes, self.min_notes)
+        chord_info = self.chord_theory.recognize_chord(self.active_notes, self.min_notes)
         publish_data: Dict[str, Any] = {
             "timestamp": time.time(),
             "full_chord_name": "N.C.",

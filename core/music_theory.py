@@ -25,6 +25,15 @@ MIN_ACCEPTABLE_CHORD_SCORE = 0.6  # Threshold for chord recognition
 # --- Logging Setup ---
 logger = logging.getLogger(__name__)  # Initial logger, will be configured in main
 
+# Import the advanced analyzer with proper error handling
+try:
+    from core.advanced_chord_analyzer import AdvancedChordAnalyzer, ChordCandidate
+    ADVANCED_ANALYZER_AVAILABLE = True
+    logger.info("Advanced chord analyzer available")
+except ImportError as e:
+    ADVANCED_ANALYZER_AVAILABLE = False
+    logger.warning(f"Advanced chord analyzer not available: {e}. Falling back to basic recognition")
+
 class ChordTheory:
     NOTE_PITCH_CLASSES = [
         "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
@@ -108,9 +117,27 @@ class ChordTheory:
         6: "#11/b5", 7: "P5", 8: "#5/b13", 9: "13/M6", 10: "m7", 11: "M7"
     }
 
-    def __init__(self, genre: str = 'jazz'):
+    def __init__(self, genre: str = 'jazz', use_advanced_analyzer: bool = True):
         self.genre = genre
         self.recent_chords: List[Dict[str, Any]] = []  # Track last 3 chords for context
+        self.use_advanced_analyzer = use_advanced_analyzer and ADVANCED_ANALYZER_AVAILABLE
+        
+        # Initialize advanced analyzer if available
+        if self.use_advanced_analyzer:
+            try:
+                self.advanced_analyzer = AdvancedChordAnalyzer()
+                logger.info("Advanced chord analyzer initialized successfully")
+            except Exception as e:
+                logger.warning(f"Failed to initialize advanced chord analyzer: {e}. Using basic recognition.")
+                self.advanced_analyzer = None
+                self.use_advanced_analyzer = False
+        else:
+            self.advanced_analyzer = None
+            if ADVANCED_ANALYZER_AVAILABLE:
+                logger.info("Advanced analyzer available but disabled by user preference")
+            else:
+                logger.info("Using basic chord recognition (advanced analyzer not available)")
+            
         self.load_chord_definitions()
 
     @classmethod
@@ -203,6 +230,135 @@ class ChordTheory:
         return final_score
 
     def recognize_chord(
+        self, played_midi_notes: Set[int], min_notes_for_chord: int
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Main chord recognition method with automatic fallback
+        Uses advanced analyzer if available, otherwise falls back to basic method
+        """
+        if self.use_advanced_analyzer and self.advanced_analyzer:
+            return self.recognize_chord_advanced(played_midi_notes, min_notes_for_chord)
+        else:
+            return self.recognize_chord_basic(played_midi_notes, min_notes_for_chord)
+    
+    def recognize_chord_advanced(
+        self, played_midi_notes: Set[int], min_notes_for_chord: int
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Advanced chord recognition with voice separation and fuzzy matching
+        """
+        if len(played_midi_notes) < min_notes_for_chord:
+            return None
+        
+        # Convert to list for the advanced analyzer
+        midi_notes_list = list(played_midi_notes)
+        
+        # Use advanced analyzer
+        candidate = self.advanced_analyzer.analyze_chord_fuzzy(midi_notes_list)
+        
+        if not candidate:
+            return None
+        
+        # Convert ChordCandidate to the expected format
+        sorted_played_midi_notes = sorted(midi_notes_list)
+        lowest_midi_note = sorted_played_midi_notes[0]
+        played_pitch_classes = set(note % 12 for note in sorted_played_midi_notes)
+        
+        # Get bass note from voice separation or use lowest note
+        bass_notes = candidate.voice_separation.get('bass', [])
+        if bass_notes:
+            bass_midi_note = min(bass_notes)
+        else:
+            bass_midi_note = lowest_midi_note
+            
+        bass_pc = bass_midi_note % 12
+        bass_name = self.midi_to_pitch_class_name(bass_pc)
+        
+        # Determine inversion
+        inversion_text = "Root Position"
+        full_chord_name = candidate.chord_name
+        
+        bass_interval_rel_to_root = (bass_pc - candidate.root_pc + 12) % 12
+        if bass_interval_rel_to_root != 0:
+            full_chord_name += f"/{bass_name}"
+            if bass_interval_rel_to_root == 4:  # Major third
+                inversion_text = "1st Inversion"
+            elif bass_interval_rel_to_root == 7:  # Perfect fifth
+                inversion_text = "2nd Inversion"
+            elif bass_interval_rel_to_root == 10:  # Minor seventh
+                inversion_text = "3rd Inversion"
+            else:
+                inversion_text = "Slash Chord"
+        
+        # Calculate octave span and voicing
+        octave_span = (sorted_played_midi_notes[-1] - lowest_midi_note) / 12.0
+        
+        voicing_density_text = "N/A"
+        if len(sorted_played_midi_notes) >= 2:
+            if len(sorted_played_midi_notes) == 2:
+                voicing_density_text = "Interval"
+            elif octave_span < 1.0:
+                voicing_density_text = "Very Close Voicing"
+            elif octave_span < 1.5:
+                voicing_density_text = "Close Voicing"
+            elif octave_span < 2.5:
+                voicing_density_text = "Moderately Open Voicing"
+            else:
+                voicing_density_text = "Very Open (Spread) Voicing"
+        
+        # Find played root MIDI note
+        played_root_midi_note = next(
+            (note for note in sorted_played_midi_notes if note % 12 == candidate.root_pc), None
+        )
+        
+        # Calculate intervals from bass
+        intervals_from_actual_bass = sorted(
+            list(set((pc - bass_pc + 12) % 12 for pc in played_pitch_classes))
+        )
+        
+        # Build result with enhanced information
+        result = {
+            "full_chord_name": full_chord_name,
+            "root_note_pc": candidate.root_pc,
+            "root_note_name": self.midi_to_pitch_class_name(candidate.root_pc),
+            "played_root_midi_note": played_root_midi_note,
+            "bass_note_midi": bass_midi_note,
+            "bass_note_pc": bass_pc,
+            "bass_note_name": bass_name,
+            "chord_type": candidate.chord_type,
+            "chord_description": f"Advanced: {candidate.chord_name}",
+            "inversion_type": inversion_text,
+            "score": round(candidate.score, 3),
+            "confidence": round(candidate.confidence, 3),
+            "complexity": candidate.complexity.name,
+            "played_notes_midi": sorted_played_midi_notes,
+            "played_pitch_classes": sorted(list(played_pitch_classes)),
+            "octave_span_played_notes": round(octave_span, 2),
+            "voicing_density_description": voicing_density_text,
+            "intervals_from_actual_bass_pc": intervals_from_actual_bass,
+            
+            # Advanced analyzer specific information
+            "voice_separation": {
+                "bass_notes": candidate.voice_separation.get('bass', []),
+                "chord_notes": candidate.voice_separation.get('chord', []),
+                "melody_notes": candidate.voice_separation.get('melody', [])
+            },
+            "analysis_quality": {
+                "missing_expected_intervals": candidate.missing_expected,
+                "extra_intervals": candidate.extra_notes,
+                "context_bonus": round(candidate.context_bonus, 3)
+            },
+            "advanced_analysis": True
+        }
+        
+        # Update chord history
+        self.recent_chords.append(result)
+        if len(self.recent_chords) > 3:
+            self.recent_chords.pop(0)
+        
+        return result
+
+    def recognize_chord_basic(
         self, played_midi_notes: Set[int], min_notes_for_chord: int
     ) -> Optional[Dict[str, Any]]:
         if len(played_midi_notes) < min_notes_for_chord:
@@ -337,6 +493,7 @@ class ChordTheory:
             "octave_span_played_notes": round(octave_span, 2),
             "voicing_density_description": voicing_density_text,
             "intervals_from_actual_bass_pc": intervals_from_actual_bass,
+            "advanced_analysis": False  # Flag to indicate basic analysis
         }
 
         self.recent_chords.append(result)

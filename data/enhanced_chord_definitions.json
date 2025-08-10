@@ -1,0 +1,321 @@
+{
+    "_comment": "Enhanced chord definitions with advanced jazz and contemporary chords",
+    
+    "maj": {
+        "name": "Major Triad",
+        "core_intervals": [0, 4, 7],
+        "optional_intervals": []
+    },
+    "min": {
+        "name": "Minor Triad", 
+        "core_intervals": [0, 3, 7],
+        "optional_intervals": []
+    },
+    "aug": {
+        "name": "Augmented Triad",
+        "core_intervals": [0, 4, 8],
+        "optional_intervals": []
+    },
+    "dim": {
+        "name": "Diminished Triad",
+        "core_intervals": [0, 3, 6],
+        "optional_intervals": []
+    },
+    "sus2": {
+        "name": "Suspended 2nd",
+        "core_intervals": [0, 2, 7],
+        "optional_intervals": []
+    },
+    "sus4": {
+        "name": "Suspended 4th",
+        "core_intervals": [0, 5, 7],
+        "optional_intervals": []
+    },
+    "5": {
+        "name": "Power Chord",
+        "core_intervals": [0, 7],
+        "optional_intervals": []
+    },
+    
+    "_comment_7ths": "Seventh chords - basic and extended",
+    "7": {
+        "name": "Dominant 7th",
+        "core_intervals": [0, 4, 10],
+        "optional_intervals": [7]
+    },
+    "maj7": {
+        "name": "Major 7th",
+        "core_intervals": [0, 4, 11],
+        "optional_intervals": [7]
+    },
+    "m7": {
+        "name": "Minor 7th",
+        "core_intervals": [0, 3, 10],
+        "optional_intervals": [7]
+    },
+    "mMaj7": {
+        "name": "Minor Major 7th",
+        "core_intervals": [0, 3, 11],
+        "optional_intervals": [7]
+    },
+    "m7b5": {
+        "name": "Half-Diminished 7th",
+        "core_intervals": [0, 3, 6, 10],
+        "optional_intervals": []
+    },
+    "dim7": {
+        "name": "Diminished 7th",
+        "core_intervals": [0, 3, 6, 9],
+        "optional_intervals": []
+    },
+    "7sus4": {
+        "name": "Dominant 7th Suspended 4th",
+        "core_intervals": [0, 5, 10],
+        "optional_intervals": [7]
+    },
+    "maj7sus4": {
+        "name": "Major 7th Suspended 4th",
+        "core_intervals": [0, 5, 11],
+        "optional_intervals": [7]
+    },
+    
+    "_comment_9ths": "9th chords and extensions",
+    "9": {
+        "name": "Dominant 9th",
+        "core_intervals": [0, 4, 10, 2],
+        "optional_intervals": [7]
+    },
+    "maj9": {
+        "name": "Major 9th",
+        "core_intervals": [0, 4, 11, 2],
+        "optional_intervals": [7]
+    },
+    "m9": {
+        "name": "Minor 9th",
+        "core_intervals": [0, 3, 10, 2],
+        "optional_intervals": [7]
+    },
+    "mMaj9": {
+        "name": "Minor Major 9th",
+        "core_intervals": [0, 3, 11, 2],
+        "optional_intervals": [7]
+    },
+    "add9": {
+        "name": "Major Add 9",
+        "core_intervals": [0, 4, 7, 2],
+        "optional_intervals": []
+    },
+    "madd9": {
+        "name": "Minor Add 9",
+        "core_intervals": [0, 3, 7, 2],
+        "optional_intervals": []
+    },
+    "6/9": {
+        "name": "Major Six Nine",
+        "core_intervals": [0, 4, 7],
+        "optional_intervals": [2, 9]
+    },
+    "m6/9": {
+        "name": "Minor Six Nine",
+        "core_intervals": [0, 3, 7],
+        "optional_intervals": [2, 9]
+    },
+    
+    "_comment_11ths": "11th chords",
+    "11": {
+        "name": "Dominant 11th",
+        "core_intervals": [0, 4, 10, 2, 5],
+        "optional_intervals": [7]
+    },
+    "maj11": {
+        "name": "Major 11th",
+        "core_intervals": [0, 4, 11, 2, 5],
+        "optional_intervals": [7]
+    },
+    "m11": {
+        "name": "Minor 11th",
+        "core_intervals": [0, 3, 10, 2, 5],
+        "optional_intervals": [7]
+    },
+    "7#11": {
+        "name": "Dominant 7th Sharp 11",
+        "core_intervals": [0, 4, 10, 6],
+        "optional_intervals": [7, 2]
+    },
+    "maj7#11": {
+        "name": "Major 7th Sharp 11",
+        "core_intervals": [0, 4, 11, 6],
+        "optional_intervals": [7, 2]
+    },
+    
+    "_comment_13ths": "13th chords",
+    "13": {
+        "name": "Dominant 13th",
+        "core_intervals": [0, 4, 10, 9],
+        "optional_intervals": [7, 2]
+    },
+    "maj13": {
+        "name": "Major 13th",
+        "core_intervals": [0, 4, 11, 9],
+        "optional_intervals": [7, 2]
+    },
+    "m13": {
+        "name": "Minor 13th",
+        "core_intervals": [0, 3, 10, 9],
+        "optional_intervals": [7, 2]
+    },
+    "13#11": {
+        "name": "Dominant 13th Sharp 11",
+        "core_intervals": [0, 4, 10, 6, 9],
+        "optional_intervals": [7, 2]
+    },
+    
+    "_comment_altered": "Altered dominant chords",
+    "7b9": {
+        "name": "Dominant 7th Flat 9",
+        "core_intervals": [0, 4, 10, 1],
+        "optional_intervals": [7]
+    },
+    "7#9": {
+        "name": "Dominant 7th Sharp 9",
+        "core_intervals": [0, 4, 10, 3],
+        "optional_intervals": [7]
+    },
+    "7b5": {
+        "name": "Dominant 7th Flat 5",
+        "core_intervals": [0, 4, 6, 10],
+        "optional_intervals": []
+    },
+    "7#5": {
+        "name": "Dominant 7th Sharp 5",
+        "core_intervals": [0, 4, 8, 10],
+        "optional_intervals": []
+    },
+    "7b13": {
+        "name": "Dominant 7th Flat 13",
+        "core_intervals": [0, 4, 10, 8],
+        "optional_intervals": [7]
+    },
+    "7alt": {
+        "name": "Altered Dominant",
+        "core_intervals": [0, 4, 10],
+        "optional_intervals": [1, 3, 6, 8]
+    },
+    "7b9#5": {
+        "name": "Dominant 7th Flat 9 Sharp 5",
+        "core_intervals": [0, 4, 8, 10, 1],
+        "optional_intervals": []
+    },
+    "7#9b5": {
+        "name": "Dominant 7th Sharp 9 Flat 5",
+        "core_intervals": [0, 4, 6, 10, 3],
+        "optional_intervals": []
+    },
+    "7b9b5": {
+        "name": "Dominant 7th Flat 9 Flat 5",
+        "core_intervals": [0, 4, 6, 10, 1],
+        "optional_intervals": []
+    },
+    "7#9#5": {
+        "name": "Dominant 7th Sharp 9 Sharp 5",
+        "core_intervals": [0, 4, 8, 10, 3],
+        "optional_intervals": []
+    },
+    
+    "_comment_sixths": "Sixth chords",
+    "6": {
+        "name": "Major Sixth",
+        "core_intervals": [0, 4, 7, 9],
+        "optional_intervals": []
+    },
+    "m6": {
+        "name": "Minor Sixth",
+        "core_intervals": [0, 3, 7, 9],
+        "optional_intervals": []
+    },
+    
+    "_comment_other": "Other interesting chords",
+    "add4": {
+        "name": "Major Add 4",
+        "core_intervals": [0, 4, 7, 5],
+        "optional_intervals": []
+    },
+    "madd4": {
+        "name": "Minor Add 4",
+        "core_intervals": [0, 3, 7, 5],
+        "optional_intervals": []
+    },
+    "add#4": {
+        "name": "Major Add Sharp 4",
+        "core_intervals": [0, 4, 7, 6],
+        "optional_intervals": []
+    },
+    "add6": {
+        "name": "Major Add 6",
+        "core_intervals": [0, 4, 7, 9],
+        "optional_intervals": []
+    },
+    "madd6": {
+        "name": "Minor Add 6",
+        "core_intervals": [0, 3, 7, 9],
+        "optional_intervals": []
+    },
+    
+    "_comment_quartal": "Quartal and quintal harmony",
+    "4th": {
+        "name": "Quartal Chord",
+        "core_intervals": [0, 5, 10],
+        "optional_intervals": [3]
+    },
+    "5th": {
+        "name": "Quintal Chord", 
+        "core_intervals": [0, 7, 2],
+        "optional_intervals": [9]
+    },
+    
+    "_comment_polychords": "Polychord structures (simplified)",
+    "maj/maj": {
+        "name": "Major over Major",
+        "core_intervals": [0, 4, 7],
+        "optional_intervals": [2, 6, 9]
+    },
+    "min/maj": {
+        "name": "Minor over Major",
+        "core_intervals": [0, 3, 7],
+        "optional_intervals": [4, 8, 11]
+    },
+    
+    "_comment_modern": "Modern/contemporary chord structures",
+    "maj7#5": {
+        "name": "Major 7th Sharp 5",
+        "core_intervals": [0, 4, 8, 11],
+        "optional_intervals": []
+    },
+    "maj7b5": {
+        "name": "Major 7th Flat 5",
+        "core_intervals": [0, 4, 6, 11],
+        "optional_intervals": []
+    },
+    "minmaj7#5": {
+        "name": "Minor Major 7th Sharp 5",
+        "core_intervals": [0, 3, 8, 11],
+        "optional_intervals": []
+    },
+    "sus2sus4": {
+        "name": "Sus2Sus4",
+        "core_intervals": [0, 2, 5, 7],
+        "optional_intervals": []
+    },
+    
+    "_comment_cluster": "Cluster chords and dense harmonies",
+    "cluster": {
+        "name": "Cluster Chord",
+        "core_intervals": [0, 1, 2],
+        "optional_intervals": [3, 4]
+    },
+    "tone_cluster": {
+        "name": "Tone Cluster",
+        "core_intervals": [0, 2, 4],
+        "optional_intervals": [6, 8]
+    }
+}
