@@ -11,9 +11,10 @@ block_cipher = None
 app_path = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 main_script = os.path.join(app_path, 'midi_chord_app.py')  
 
-# Bundle chord definitions JSON file
+# Bundle chord definitions JSON files and any configuration files
 datas = [
-    (os.path.join(app_path, 'data', 'chord_definitions.json'), 'data')
+    (os.path.join(app_path, 'data', 'chord_definitions.json'), 'data'),
+    (os.path.join(app_path, 'data', 'enhanced_chord_definitions.json'), 'data')
 ]
 
 a = Analysis(
@@ -28,7 +29,19 @@ a = Analysis(
     win_private_assemblies=False,
     cipher=block_cipher,
     noarchive=False,
-    hiddenimports=['mido.backends.rtmidi','zmq']
+    hiddenimports=[
+        'mido.backends.rtmidi',
+        'zmq', 
+        'core.advanced_chord_analyzer',
+        'core.chord_config',
+        'ui.workers.midi_worker',
+        'ui.workers.recognizer_signal',
+        'ui.piano_keyboard_widget',
+        'ui.piano_keyboard_window',
+        'PyQt6.QtCore',
+        'PyQt6.QtWidgets', 
+        'PyQt6.QtGui'
+    ]
 )
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
