@@ -2,15 +2,112 @@ import sys
 from typing import Dict, Optional
 import mido
 from PyQt6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QComboBox, QLabel, QGridLayout, QFrame, QSizePolicy, QTextEdit
+    QMainWindow, QWidget, QVBoxLayout, QComboBox, QLabel, QGridLayout, 
+    QFrame, QSizePolicy, QTextEdit, QHBoxLayout, QCheckBox, QPushButton, QGroupBox,
+    QDialog, QApplication
 )
-from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QFont
+from PyQt6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve
+from PyQt6.QtGui import QFont, QPainter, QPen, QTransform
 
  
 
 from ui.piano_keyboard_window import PianoKeyboardWidget
 from ui.workers.midi_worker import MIDIWorkerThread
+
+# Custom spinning loading widget
+class SpinningLoader(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.angle = 0
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.rotate)
+        self.setFixedSize(40, 40)
+        
+    def start_spinning(self):
+        self.timer.start(50)  # Update every 50ms for smooth animation
+        self.show()
+        
+    def stop_spinning(self):
+        self.timer.stop()
+        self.hide()
+        
+    def rotate(self):
+        self.angle = (self.angle + 15) % 360  # Rotate 15 degrees each update
+        self.update()
+        
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        
+        # Set up the pen
+        pen = QPen(Qt.GlobalColor.white, 3, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap)
+        painter.setPen(pen)
+        
+        # Move to center and rotate
+        painter.translate(self.width() / 2, self.height() / 2)
+        painter.rotate(self.angle)
+        
+        # Draw spinning arcs
+        for i in range(8):
+            alpha = 255 - (i * 30)  # Fade effect
+            if alpha < 0:
+                alpha = 0
+            pen.setColor(QColor(255, 255, 255, alpha))
+            painter.setPen(pen)
+            
+            painter.drawLine(0, -15, 0, -10)
+            painter.rotate(45)  # 360/8 = 45 degrees between lines
+
+# Custom loading dialog with spinner
+class LoadingDialog(QDialog):
+    def __init__(self, message="Loading...", parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Processing")
+        self.setModal(True)
+        self.setFixedSize(250, 100)
+        self.setWindowFlags(Qt.WindowType.Dialog | Qt.WindowType.FramelessWindowHint)
+        
+        # Center the dialog
+        if parent:
+            parent_geo = parent.geometry()
+            x = parent_geo.x() + (parent_geo.width() - self.width()) // 2
+            y = parent_geo.y() + (parent_geo.height() - self.height()) // 2
+            self.setGeometry(x, y, self.width(), self.height())
+        
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(20, 20, 20, 20)
+        
+        # Spinner
+        self.spinner = SpinningLoader()
+        layout.addWidget(self.spinner)
+        
+        # Message label
+        self.message_label = QLabel(message)
+        self.message_label.setStyleSheet("color: white; font-size: 12pt;")
+        layout.addWidget(self.message_label)
+        
+        # Style the dialog
+        self.setStyleSheet("""
+            QDialog {
+                background-color: #2E2E2E;
+                border: 2px solid #555555;
+                border-radius: 10px;
+            }
+        """)
+        
+    def show_loading(self, message=None):
+        if message:
+            self.message_label.setText(message)
+        self.spinner.start_spinning()
+        self.show()
+        QApplication.processEvents()
+        
+    def close_loading(self):
+        self.spinner.stop_spinning()
+        self.close()
+
+# Add QColor import
+from PyQt6.QtGui import QFont, QPainter, QPen, QTransform, QColor
 
 # Assume your 'midi_chord_recognize_final.py' is saved as 'midi_recognizer_engine.py'
 # and we can import MIDIChordRecognizer and ChordTheory from it.
@@ -32,6 +129,7 @@ class ChordAppMainWindow(QMainWindow):
 
         self.recognizer_thread: Optional[MIDIWorkerThread] = None
         self.piano_keyboard_widget: Optional[PianoKeyboardWidget] = None
+        self.loading_dialog: Optional[LoadingDialog] = None
 
         # --- Styling ---
         self.setStyleSheet("""
@@ -89,6 +187,9 @@ class ChordAppMainWindow(QMainWindow):
         self.midi_port_combo.setPlaceholderText("Select MIDI Input Device")
         self.midi_port_combo.activated.connect(self.on_midi_port_selected) # Use activated for user selection
         self.layout.addWidget(self.midi_port_combo)
+
+        # Advanced Analyzer Controls
+        self._setup_analyzer_controls()
 
         # Chord Display Area
         chord_display_frame = QFrame()
@@ -150,6 +251,89 @@ class ChordAppMainWindow(QMainWindow):
         # piano_placeholder.setFrameStyle(QFrame.Shape.Box | QFrame.Shadow.Sunken)
         # self.layout.addWidget(piano_placeholder)
 
+    def _setup_analyzer_controls(self):
+        """Setup controls for advanced chord analyzer"""
+        analyzer_group = QGroupBox("Chord Analysis Settings")
+        analyzer_layout = QVBoxLayout(analyzer_group)
+        
+        # Analyzer type selection
+        analyzer_type_layout = QHBoxLayout()
+        analyzer_type_layout.addWidget(QLabel("Analyzer:"))
+        
+        self.analyzer_combo = QComboBox()
+        self.analyzer_combo.addItems(["Advanced (Enhanced)", "Basic (Traditional)"])
+        self.analyzer_combo.setCurrentIndex(0)  # Default to advanced
+        self.analyzer_combo.currentTextChanged.connect(self._on_analyzer_changed)
+        analyzer_type_layout.addWidget(self.analyzer_combo)
+        analyzer_layout.addLayout(analyzer_type_layout)
+        
+        # Advanced settings (only shown when advanced is selected)
+        self.advanced_settings_widget = QWidget()
+        advanced_settings_layout = QVBoxLayout(self.advanced_settings_widget)
+        
+        # Voice separation checkbox
+        self.voice_separation_cb = QCheckBox("Enable Voice Separation (Bass/Chord/Melody)")
+        self.voice_separation_cb.setChecked(True)
+        self.voice_separation_cb.setToolTip("Separates bass, chord tones, and melody for better recognition")
+        advanced_settings_layout.addWidget(self.voice_separation_cb)
+        
+        # Context analysis checkbox
+        self.context_analysis_cb = QCheckBox("Enable Musical Context Analysis")
+        self.context_analysis_cb.setChecked(True)
+        self.context_analysis_cb.setToolTip("Considers chord progressions and voice leading for better accuracy")
+        advanced_settings_layout.addWidget(self.context_analysis_cb)
+        
+        # Fuzzy matching checkbox
+        self.fuzzy_matching_cb = QCheckBox("Enable Fuzzy Chord Matching")
+        self.fuzzy_matching_cb.setChecked(True)
+        self.fuzzy_matching_cb.setToolTip("Recognizes incomplete chords and jazz voicings")
+        advanced_settings_layout.addWidget(self.fuzzy_matching_cb)
+        
+        analyzer_layout.addWidget(self.advanced_settings_widget)
+        
+        # Chord definitions selection
+        definitions_layout = QHBoxLayout()
+        definitions_layout.addWidget(QLabel("Chord Set:"))
+        
+        self.chord_definitions_combo = QComboBox()
+        self.chord_definitions_combo.addItems(["Enhanced (Jazz/Advanced)", "Basic (Standard)"])
+        self.chord_definitions_combo.setCurrentIndex(0)
+        definitions_layout.addWidget(self.chord_definitions_combo)
+        analyzer_layout.addLayout(definitions_layout)
+        
+        self.layout.addWidget(analyzer_group)
+    
+    def _on_analyzer_changed(self, text: str):
+        """Handle analyzer type change"""
+        is_advanced = "Advanced" in text
+        self.advanced_settings_widget.setVisible(is_advanced)
+        
+        # If we have an active recognizer, restart it with new settings
+        if self.recognizer_thread and self.recognizer_thread.isRunning():
+            current_port = self.midi_port_combo.currentText()
+            self._restart_recognizer_with_new_settings(current_port)
+    
+    def _restart_recognizer_with_new_settings(self, port_name: str):
+        """Restart the recognizer with updated settings"""
+        if self.recognizer_thread and self.recognizer_thread.isRunning():
+            # Show spinning loader for restart
+            self.loading_dialog = LoadingDialog("Restarting MIDI recognizer...", self)
+            self.loading_dialog.show_loading()
+            
+            self.recognizer_thread.stop_recognizer()
+            if not self.recognizer_thread.wait(3000):  # Wait up to 3 seconds
+                self.loading_dialog.message_label.setText("Force stopping MIDI thread...")
+                QApplication.processEvents()
+                print("Warning: MIDI thread did not stop gracefully, forcing termination")
+                self.recognizer_thread.terminate()
+                self.recognizer_thread.wait(1000)  # Wait a bit more after termination
+            
+            self.loading_dialog.close_loading()
+            self.loading_dialog = None
+        
+        # Start with new settings
+        self._start_recognizer_for_port(port_name)
+
 
     def _populate_midi_ports(self, selected_port_name: Optional[str] = None):
         current_selection = selected_port_name if selected_port_name else self.midi_port_combo.currentText()
@@ -189,7 +373,20 @@ class ChordAppMainWindow(QMainWindow):
     def on_midi_port_selected(self, index: int):
         if index == 0: # "Select MIDI Input Device" placeholder
             if self.recognizer_thread and self.recognizer_thread.isRunning():
+                # Show brief spinning loader for stopping
+                self.loading_dialog = LoadingDialog("Stopping MIDI recognizer...", self)
+                self.loading_dialog.show_loading()
+                
                 self.recognizer_thread.stop_recognizer()
+                if not self.recognizer_thread.wait(2000):
+                    self.loading_dialog.message_label.setText("Force stopping...")
+                    QApplication.processEvents()
+                    self.recognizer_thread.terminate()
+                    self.recognizer_thread.wait(500)
+                
+                self.loading_dialog.close_loading()
+                self.loading_dialog = None
+                
             self.status_label.setText("Please select a MIDI port.")
             self._reset_chord_display()
             return
@@ -198,7 +395,20 @@ class ChordAppMainWindow(QMainWindow):
         self.status_label.setText(f"Selected MIDI port: {port_name}. Starting recognizer...")
 
         if self.recognizer_thread and self.recognizer_thread.isRunning():
+            # Show spinning loader for switching ports
+            self.loading_dialog = LoadingDialog("Switching MIDI port...", self)
+            self.loading_dialog.show_loading()
+            
             self.recognizer_thread.stop_recognizer()
+            if not self.recognizer_thread.wait(2000):
+                self.loading_dialog.message_label.setText("Force stopping current recognizer...")
+                QApplication.processEvents()
+                self.recognizer_thread.terminate()
+                self.recognizer_thread.wait(500)
+            
+            self.loading_dialog.close_loading()
+            self.loading_dialog = None
+            
             # Give it a moment to fully stop before starting a new one
             QTimer.singleShot(200, lambda: self._start_recognizer_for_port(port_name))
         else:
@@ -259,34 +469,90 @@ class ChordAppMainWindow(QMainWindow):
         self.details_labels["inversion"].setText(chord_data.get('inversion_type', "---"))
         
         score = chord_data.get('score', 0.0)
-        self.details_labels["score"].setText(f"{score:.2f}" if score > 0 else "---")
+        confidence = chord_data.get('confidence', None)
+        if confidence is not None:
+            score_text = f"{score:.2f} (C:{confidence:.2f})"
+        else:
+            score_text = f"{score:.2f}" if score > 0 else "---"
+        self.details_labels["score"].setText(score_text)
         
         self.details_labels["voicing"].setText(chord_data.get('voicing_density_description', "---"))
         self.details_labels["octave_span"].setText(str(chord_data.get('octave_span_played_notes', "---")))
 
-        # --- Populate TextEdit with more details ---
+        # --- Enhanced details with advanced analysis ---
         html_content = ""
+        
+        # Show analyzer type
+        is_advanced = chord_data.get('advanced_analysis', False)
+        analyzer_type = "Advanced Enhanced" if is_advanced else "Basic Traditional"
+        html_content += f"<p><b>Analyzer:</b> {analyzer_type}</p>"
+        
         notes_midi = chord_data.get('played_notes_midi', [])
         if notes_midi:
-            note_names = [f"{ChordTheory.midi_to_pitch_class_name(n)}{n//12 - 1}({n})" for n in notes_midi] # C4(60)
+            note_names = [f"{ChordTheory.midi_to_pitch_class_name(n)}{n//12 - 1}({n})" for n in notes_midi]
             html_content += f"<p><b>Played Notes:</b> {', '.join(note_names)}</p>"
         
+        # Advanced analysis specific information
+        if is_advanced and full_name != "N.C.":
+            # Voice separation info
+            voice_sep = chord_data.get('voice_separation', {})
+            if voice_sep:
+                bass_notes = voice_sep.get('bass_notes', [])
+                chord_notes = voice_sep.get('chord_notes', [])
+                melody_notes = voice_sep.get('melody_notes', [])
+                
+                if bass_notes:
+                    bass_names = [f"{ChordTheory.midi_to_pitch_class_name(n)}{n//12 - 1}" for n in bass_notes]
+                    html_content += f"<p><b>Bass Voice:</b> {', '.join(bass_names)}</p>"
+                
+                if chord_notes:
+                    chord_names = [f"{ChordTheory.midi_to_pitch_class_name(n)}{n//12 - 1}" for n in chord_notes]
+                    html_content += f"<p><b>Chord Voice:</b> {', '.join(chord_names)}</p>"
+                
+                if melody_notes:
+                    melody_names = [f"{ChordTheory.midi_to_pitch_class_name(n)}{n//12 - 1}" for n in melody_notes]
+                    html_content += f"<p><b>Melody Voice:</b> {', '.join(melody_names)}</p>"
+            
+            # Analysis quality
+            analysis_quality = chord_data.get('analysis_quality', {})
+            if analysis_quality:
+                missing = analysis_quality.get('missing_expected_intervals', [])
+                extra = analysis_quality.get('extra_intervals', [])
+                context_bonus = analysis_quality.get('context_bonus', 0)
+                
+                if missing:
+                    html_content += f"<p><b>Missing Expected:</b> {missing}</p>"
+                if extra:
+                    html_content += f"<p><b>Extra Notes:</b> {extra}</p>"
+                if context_bonus > 0:
+                    html_content += f"<p><b>Context Bonus:</b> +{context_bonus:.3f}</p>"
+            
+            # Complexity level
+            complexity = chord_data.get('complexity', '')
+            if complexity:
+                html_content += f"<p><b>Complexity:</b> {complexity}</p>"
+        
+        # Standard interval analysis
         if full_name != "N.C.":
             pcs = chord_data.get('played_pitch_classes', [])
             html_content += f"<p><b>Pitch Classes:</b> {pcs}</p>"
             
             all_rel_root = chord_data.get('all_played_intervals_rel_to_root', [])
-            all_rel_root_names = [ChordTheory.interval_to_name(i, use_extended_names=True) for i in all_rel_root]
-            html_content += f"<p><b>Intervals (from Root {chord_data.get('root_note_name', '')}):</b> {all_rel_root} <i>({', '.join(all_rel_root_names)})</i></p>"
+            if all_rel_root:
+                all_rel_root_names = [ChordTheory.interval_to_name(i, use_extended_names=True) for i in all_rel_root]
+                html_content += f"<p><b>Intervals (from Root {chord_data.get('root_note_name', '')}):</b> {all_rel_root} <i>({', '.join(all_rel_root_names)})</i></p>"
 
-            extra_rel_root = chord_data.get('extra_played_intervals_rel_to_root', [])
-            if extra_rel_root:
-                extra_names = [ChordTheory.interval_to_name(i, use_extended_names=True) for i in extra_rel_root]
-                html_content += f"<p><b>Extra Intervals (from Root):</b> {extra_rel_root} <i>({', '.join(extra_names)})</i></p>"
+            # Only show extra intervals for basic analysis (advanced shows this differently)
+            if not is_advanced:
+                extra_rel_root = chord_data.get('extra_played_intervals_rel_to_root', [])
+                if extra_rel_root:
+                    extra_names = [ChordTheory.interval_to_name(i, use_extended_names=True) for i in extra_rel_root]
+                    html_content += f"<p><b>Extra Intervals (from Root):</b> {extra_rel_root} <i>({', '.join(extra_names)})</i></p>"
 
             intervals_from_bass = chord_data.get('intervals_from_actual_bass_pc', [])
-            intervals_from_bass_names = [ChordTheory.interval_to_name(i) for i in intervals_from_bass]
-            html_content += f"<p><b>Intervals (from Bass {chord_data.get('bass_note_name', '')}):</b> {intervals_from_bass} <i>({', '.join(intervals_from_bass_names)})</i></p>"
+            if intervals_from_bass:
+                intervals_from_bass_names = [ChordTheory.interval_to_name(i) for i in intervals_from_bass]
+                html_content += f"<p><b>Intervals (from Bass {chord_data.get('bass_note_name', '')}):</b> {intervals_from_bass} <i>({', '.join(intervals_from_bass_names)})</i></p>"
 
         self.details_text_edit.setHtml(f"<div>{html_content}</div>")
 
@@ -297,8 +563,58 @@ class ChordAppMainWindow(QMainWindow):
 
 
     def closeEvent(self, event):
-        self.port_scan_timer.stop()
+        """Handle application close with spinning loading animation"""
         if self.recognizer_thread and self.recognizer_thread.isRunning():
-            self.status_label.setText("Closing... Stopping recognizer thread.")
-            self.recognizer_thread.stop_recognizer()
-        super().closeEvent(event)
+            # Accept the event first to start closing
+            event.accept()
+            
+            # Show spinning loader for shutdown
+            self.loading_dialog = LoadingDialog("Shutting down application...", self)
+            self.loading_dialog.show_loading()
+            
+            # Stop the port scan timer first
+            self.port_scan_timer.stop()
+            self.loading_dialog.message_label.setText("Stopping MIDI recognizer...")
+            QApplication.processEvents()
+            
+            # Start the shutdown process
+            self._initiate_graceful_shutdown()
+        else:
+            # No recognizer running, close immediately
+            self.port_scan_timer.stop()
+            super().closeEvent(event)
+
+    def _initiate_graceful_shutdown(self):
+        """Start the graceful shutdown process"""
+        # Signal the recognizer to stop
+        self.recognizer_thread.stop_recognizer()
+        
+        # Wait for graceful shutdown with timeout
+        if not self.recognizer_thread.wait(3000):  # Wait up to 3 seconds
+            self.loading_dialog.message_label.setText("Force stopping MIDI thread...")
+            QApplication.processEvents()
+            self.recognizer_thread.terminate()
+            self.recognizer_thread.wait(1000)  # Wait a bit more after termination
+        
+        # Complete shutdown
+        self._complete_shutdown()
+
+    def _complete_shutdown(self):
+        """Complete the shutdown process"""
+        if self.loading_dialog:
+            self.loading_dialog.message_label.setText("Finalizing shutdown...")
+            QApplication.processEvents()
+            
+            # Brief delay to show completion
+            QTimer.singleShot(300, self._finish_shutdown)
+        else:
+            self._finish_shutdown()
+
+    def _finish_shutdown(self):
+        """Final cleanup and close"""
+        if self.loading_dialog:
+            self.loading_dialog.close_loading()
+            self.loading_dialog = None
+        
+        # Call the parent closeEvent to actually close the window
+        QApplication.quit()

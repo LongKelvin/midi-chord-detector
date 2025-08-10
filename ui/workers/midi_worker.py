@@ -101,5 +101,5 @@ class MIDIWorkerThread(QThread):
         if self.recognizer:
             self.recognizer.stop() # Tell the engine to stop
         self.quit() # Ask QThread to quit
-        self.wait() # Wait for run() to finish
-        self.signals.recognizer_status.emit("Worker thread stopped.")
+        # Don't wait here - let the caller handle the timeout
+        self.signals.recognizer_status.emit("Worker thread stopping...")
