@@ -2,3 +2,6 @@ mido>=1.2.10
 python-rtmidi>=1.4.9
 PyQt6>=6.4.0
 pyzmq>=25.0.0 # Optional: only if ZMQ functionality is actively used/re-enabled
+
+# Optional dependencies for advanced features
+# numpy>=1.21.0  # Uncomment if using advanced mathematical analysis features
